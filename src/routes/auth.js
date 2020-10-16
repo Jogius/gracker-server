@@ -102,4 +102,16 @@ router.post("/token", async (req, res) => {
   );
 });
 
+router.delete("/logout", async (req, res) => {
+  jwt.verify(
+    req.cookies["x-refresh-token"],
+    process.env.REFRESH_TOKEN_SECRET,
+    async (err, user) => {
+      if (err) return res.json({error: err.message});
+      await RefreshToken.deleteOne({token: user.token});
+      res.json({message: "Logged out successfully!"});
+    }
+  );
+});
+
 module.exports = router;
