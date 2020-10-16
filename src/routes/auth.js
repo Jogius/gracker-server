@@ -114,4 +114,16 @@ router.delete("/logout", async (req, res) => {
   );
 });
 
+router.delete("/logout/all", async (req, res) => {
+  jwt.verify(
+    req.cookies["x-refresh-token"],
+    process.env.REFRESH_TOKEN_SECRET,
+    async (err, user) => {
+      if (err) return res.json({error: err.message});
+      await RefreshToken.deleteMany({userId: user.id});
+      res.json({message: "Fully logged out successfully!"});
+    }
+  );
+});
+
 module.exports = router;
