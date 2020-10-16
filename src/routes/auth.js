@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const RefreshToken = require("../models/RefreshToken");
 const {registerValidation, loginValidation} = require("../util/validation");
+const verifyToken = require("../util/verifyToken");
 
 router.post("/register", async (req, res) => {
   // Validate submitted user data
@@ -111,28 +112,14 @@ router.post("/token", async (req, res) => {
   );
 });
 
-router.delete("/logout", async (req, res) => {
-  jwt.verify(
-    req.cookies["x-refresh-token"],
-    process.env.REFRESH_TOKEN_SECRET,
-    async (err, user) => {
-      if (err) return res.json({error: err.message});
-      await RefreshToken.deleteOne({token: user.token});
-      res.json({message: "Logged out successfully!"});
-    }
-  );
+router.delete("/logout", verifyToken, async (req, res) => {
+  await RefreshToken.deleteOne({token: req.cookies["x-refresh-token"]});
+  res.json({message: "Logged out successfully!"});
 });
 
-router.delete("/logout/all", async (req, res) => {
-  jwt.verify(
-    req.cookies["x-refresh-token"],
-    process.env.REFRESH_TOKEN_SECRET,
-    async (err, user) => {
-      if (err) return res.json({error: err.message});
-      await RefreshToken.deleteMany({userId: user.id});
-      res.json({message: "Fully logged out successfully!"});
-    }
-  );
+router.delete("/logout/all", verifyToken, async (req, res) => {
+  await RefreshToken.deleteMany({userId: req.user.id});
+  res.json({message: "Fully logged successfully!"});
 });
 
 module.exports = router;
