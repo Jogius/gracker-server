@@ -1,0 +1,19 @@
+{
+  "name": "gracker-server",
+  "version": "0.1.0",
+  "description": "A simple grade tracking system",
+  "main": "src/",
+  "scripts": {
+    "start": "node src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jogius/gracker-server.git"
+  },
+  "author": "jogius",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jogius/gracker-server/issues"
+  },
+  "homepage": "https://github.com/Jogius/gracker-server#readme"
+}
