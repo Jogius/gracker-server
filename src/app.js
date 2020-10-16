@@ -20,4 +20,7 @@ mongoose.connect(
   () => console.log("Connected to MongoDB")
 );
 
+const authRouter = require("./routes/auth");
+app.use("/auth", authRouter);
+
 module.exports = app;
