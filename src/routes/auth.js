@@ -81,4 +81,25 @@ router.post("/login", async (req, res) => {
     });
 });
 
+router.post("/token", async (req, res) => {
+  const refreshToken = await RefreshToken.findOne({
+    token: req.cookies["x-refresh-token"],
+  });
+  if (!refreshToken) return res.json({error: "Invalid refresh token!"});
+
+  jwt.verify(
+    req.cookies["x-refresh-token"],
+    process.env.REFRESH_TOKEN_SECRET,
+    (err, user) => {
+      if (err) return res.json({error: err.message});
+      res.json({
+        message: "Token refreshed!",
+        token: jwt.sign({id: user.id}, process.env.ACCESS_TOKEN_SECRET, {
+          expiresIn: "10m",
+        }),
+      });
+    }
+  );
+});
+
 module.exports = router;
