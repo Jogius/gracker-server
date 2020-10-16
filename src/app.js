@@ -23,4 +23,7 @@ mongoose.connect(
 const authRouter = require("./routes/auth");
 app.use("/auth", authRouter);
 
+const gradeRouter = require("./routes/grades");
+app.use("/grades", gradeRouter);
+
 module.exports = app;
