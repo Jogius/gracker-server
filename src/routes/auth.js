@@ -4,8 +4,13 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
 const RefreshToken = require("../models/RefreshToken");
+const {registerValidation, loginValidation} = require("../util/validation");
 
 router.post("/register", async (req, res) => {
+  // Validate submitted user data
+  const {error} = registerValidation(req.body);
+  if (error) return res.json({error: error.details[0].message});
+
   // Check if user with given email already exists
   const emailExists = await User.findOne({email: req.body.email.toLowerCase()});
   if (emailExists) return res.json({error: "Email already in use!"});
@@ -50,6 +55,10 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
+  // Validate submitted user data
+  const {error} = loginValidation(req.body);
+  if (error) return res.json({error: error.details[0].message});
+
   // Check if user with given email address exists
   const user = await User.findOne({email: req.body.email.toLowerCase()});
   if (!user)
