@@ -1,7 +1,9 @@
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
+const RefreshToken = require("../models/RefreshToken");
 
 router.post("/register", async (req, res) => {
   // Check if user with given email already exists
@@ -17,7 +19,7 @@ router.post("/register", async (req, res) => {
         .hash(req.body.password, salt)
         .then(async (hash) => {
           // Create new User
-          const newUser = User({
+          const newUser = new User({
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email.toLowerCase(),
@@ -42,6 +44,38 @@ router.post("/register", async (req, res) => {
         });
     })
     // Catch salt generation error
+    .catch((err) => {
+      return res.json({error: err.message});
+    });
+});
+
+router.post("/login", async (req, res) => {
+  // Check if user with given email address exists
+  const user = await User.findOne({email: req.body.email.toLowerCase()});
+  if (!user)
+    return res.json({error: `User with email address ${req.body.email} does not exist!`});
+
+  // Check if the correct password was used
+  const validPassword = await bcrypt.compare(req.body.password, user.password);
+  if (!validPassword) return res.json({error: "Invalid password!"});
+
+  // Create JWT Refresh Token
+  const newRefreshToken = new RefreshToken({
+    token: jwt.sign({id: user._id}, process.env.REFRESH_TOKEN_SECRET),
+    userId: user._id,
+  });
+  // Save JWT Refresh Token
+  await newRefreshToken
+    .save()
+    .then((refreshToken) => {
+      res
+        .cookie("x-refresh-token", refreshToken, {
+          maxAge: 604800000,
+          httpOnly: true,
+        })
+        .json({message: "Logged in successfully!"});
+    })
+    // Catch saving error
     .catch((err) => {
       return res.json({error: err.message});
     });
